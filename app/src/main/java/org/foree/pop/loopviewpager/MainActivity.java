@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         mSectionsPagerAdapter.setPage(new SwitchPage());
+        mViewPager.setOffscreenPageLimit(2);
 
     }
 
