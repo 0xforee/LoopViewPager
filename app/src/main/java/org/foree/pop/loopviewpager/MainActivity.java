@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         PlaceholderFragment[] fragments;
 
         private boolean init = true;
+        ChapterLinkedList<Integer> chapterLinkedList;
+        Iterator iterator;
 
         public SwitchPage() {
             fragments = new PlaceholderFragment[]{
@@ -64,37 +70,57 @@ public class MainActivity extends AppCompatActivity {
                     PlaceholderFragment.newInstance(1),
                     PlaceholderFragment.newInstance(2)
             };
+
+            chapterLinkedList = new ChapterLinkedList<>();
+
+            for (int j = 0; j < 10; j++) {
+                chapterLinkedList.addLast(j);
+            }
+
+            initChapter("", 3);
+        }
+
+        private void initChapter(String chapterUrl, int position){
+            iterator = chapterLinkedList.iterator();
+            while(iterator.hasNext()){
+                Integer i = (Integer) iterator.next();
+                if(i == position){
+                    chapterLinkedList.moveTo(i);
+                }
+            }
         }
 
         // -3是zuo边缘, 5是you边缘
         @Override
         public void onDataChanged(int position) {
             int offset = position - 1;
+            Log.d(TAG, "[foree] onDataChanged: offset = " + offset);
+
             if(init){
                 init = false;
             }else {
                 if (offset < 0) {
+                    chapterLinkedList.movePrev();
                     Log.d(TAG, "[foree] onDataChanged: 向左滑动");
                     i--;
                 } else if (offset > 0) {
+                    chapterLinkedList.moveNext();
                     Log.d(TAG, "[foree] onDataChanged: 向右滑动");
                     i++;
                 }
             }
 
-
-            if (offset != 0) {
-                fragments[0].setText((i - 1));
-                fragments[1].setText(i);
-                fragments[2].setText(i + 1);
-            }
-
-
             // 上一页已经无法获取，当前页到了最左边，禁止左滑动
-            mViewPager.setPreScrollDisable((i - 1) < -3);
+            mViewPager.setPreScrollDisable(!chapterLinkedList.hasPrevious());
 
             // 下一页已经无法获取，当前页到了最左边，禁止左滑动
-            mViewPager.setPostScrollDisable((i + 1) > 5);
+            mViewPager.setPostScrollDisable(!chapterLinkedList.hasNext());
+
+            if (offset != 0) {
+                if(chapterLinkedList.hasPrevious()) fragments[0].setText(chapterLinkedList.getPrevData());
+                fragments[1].setText(chapterLinkedList.getCurrentData());
+                if(chapterLinkedList.hasNext()) fragments[2].setText(chapterLinkedList.getNextData());
+            }
 
         }
 
